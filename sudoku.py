@@ -52,9 +52,9 @@ def parse_grid(grid):
 
 def assign(values, square, digit):
     # Tries to eliminate all digits but one from the square's possible values,
-    # and if possible, remove the last remaining digit from the square's peers.
-    # Returns false if a contradiction is discovered (the same digit must be
-    # contained in another peer, which is not possible by game rules).
+    # and removes the last remaining digit from the square's peers.
+    # Returns false if a contradiction is discovered (the same digit is
+    # contained in a peer, which is not possible by game rules).
     other_values = copy(values[square])
     try:
         other_values.remove(digit)
@@ -65,7 +65,6 @@ def assign(values, square, digit):
     if all(eliminate(values, square, next_digit) for next_digit in other_values):
         return values
     else:
-        print "Contradiction discovered, failed to assign."
         return False
 
 def eliminate(values, square, digit):
@@ -83,7 +82,6 @@ def eliminate(values, square, digit):
     # If the square is reduced to one last value, then that value cannot be contained
     # in its peers. Eliminate that value from the peers.
     if len(values[square]) == 0:
-        print "Contradiction discovered - removed the last value!"
         return False
     elif len(values[square]) == 1:
         last_digit = values[square][0]
@@ -93,23 +91,47 @@ def eliminate(values, square, digit):
     for unit in units[square]:
         digit_places = [unit_square for unit_square in unit if digit in values[unit_square]]
         if len(digit_places) == 0:
-            print "Contradiction - I found no place for this value!"
             return False
         elif len(digit_places) == 1:
             if not assign(values, digit_places[0], digit):
                 return False
     return values
 
+def search(values):
+    # Uses recursive search after constraint propagation to try all possible values one square at the time.
+    if values is False:
+        return False
+    if all(len(values[square]) == 1 for square in squares):
+        return values
+    # if puzzle is not solved or a contradiction has not been discovered, search
+    # through the square with the fewest possible remaining values
+    length, square = min((len(values[s]), s) for s in squares if len(values[s]) > 1)
+    finish = solution(search(assign(copy(values), square, digit)) for digit in values[square])
+    return finish
 
-def run():
-    csv_file = raw_input("Please enter then name of the .txt/.csv file containing the sudoku puzzle.\n>> ")
+def solution(sequence):
+    # Checks for a working layout for the puzzle if such exists
+    for solution in sequence:
+        if solution: return solution
+    return False
+
+def render(values):
+    output_filename = (filename.split('.')[0]) + "_solution.csv"
+
+    split_array = lambda values, n=9: [values[i:i+n] for i in range(0, len(values), n)]
+    result_matrix = split_array([value[0] for key, value in values.items()])
+
+    print "matrix", result_matrix
+
+def run(csv_file):
     if csv_file.lower().endswith(('.csv', '.txt')):
         try: 
             puzzle = open_puzzle(csv_file)
-            parse_grid(puzzle)
+            render(search(parse_grid(puzzle)))
         except IOError, error:
             print error[1]
     else:
         print "You need the puzzle in a .txt or .csv file!"
 
-run()
+filename = raw_input("Please enter then name of the .txt/.csv file containing the sudoku puzzle.\n>> ")
+run(filename)
