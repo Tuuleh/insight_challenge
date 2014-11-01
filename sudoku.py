@@ -117,11 +117,16 @@ def solution(sequence):
 
 def render(values):
     output_filename = (filename.split('.')[0]) + "_solution.csv"
+    output_file = open(output_filename, 'wb')
+    solution_writer = csv.writer (output_file)
 
-    split_array = lambda values, n=9: [values[i:i+n] for i in range(0, len(values), n)]
-    result_matrix = split_array([value[0] for key, value in values.items()])
+    results_array = [values[item][0] for item in squares]
+    split_array = lambda array, n=9: [array[i:i+n] for i in range(0, len(array), n)]
 
-    print "matrix", result_matrix
+    for row in split_array(results_array):
+        solution_writer.writerow(row)
+
+    output_file.close()
 
 def run(csv_file):
     if csv_file.lower().endswith(('.csv', '.txt')):
