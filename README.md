@@ -42,9 +42,14 @@ In the task, I refer to the entire 81-square 'play area' as the <i>grid</i>. The
 
 Each square has its own "identification code", with an alphabetical character from A to I indicating its row, and a digit between 1 and 9 indicating its row. (e.g. the units for the first row are A1, A2, A3... A9, and the last column A9, B9, C9, ..., I9. The units and peers of each square are contained in dictionaries, with the square's identification code as key and lists of the squares' units (or peers) as values. At the start of the program, it computes a dictionary containing all the possible values for each square, and the possible values of this dictionary are gradually eliminated to arrive at the solution.
 
-The program uses a combination of two heuristic strategies and recursive search to solve the puzzle. The heuristic strategies are the following:
+The program uses a combination of two heuristic strategies, the 'naked twins'-strategy, and recursive search to solve the puzzle. The heuristic strategies are the following:
 
 <i> a) If there is only one possible value for the square, that value cannot be contained by its peers (squares in the same row, column or box). Therefore, that value can be eliminated from its peers.<br>
 <i> b) If a unit (row, column or box) has only one possible place for a value, the value must be placed in that location.
 
 A failure in either heuristic strategy implies a contradiction in the puzzle. For simpler puzzles, the heuristic strategies are often enough to arrive at a solution, whereas more difficult ones rely on recursive search.
+
+The naked twins strategy is used when two squares are found within the same unit, containing only the same two digits. This means that no other square in the same unit can contain either of the values, and so the values can safely be removed from all the other squares in the unit.
+
+<h2>Running the program</h2>
+This is a simple command line program that has been tested with Python 2.7. To run it, clone the repository, go into the folder that is created, and run the program by typing 'sudoku.py'. When prompted, type in the name of the file that contains your puzzle (it has to be a .csv or a .txt file) - the results get stored into a new .csv file with _solution appended to your original filename - e.g. from "sudoku.csv" to "sudoku_solution.csv". 
