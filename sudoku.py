@@ -14,12 +14,12 @@ def cross(A, B):
         A = [A]
     return [str(a)+str(b) for a in A for b in B]
 
-digits   = [1,2,3,4,5,6,7,8,9]
-rows     = ['A','B','C','D','E','F','G','H','I']
-columns  = digits
+digits = [1,2,3,4,5,6,7,8,9]
+rows = ['A','B','C','D','E','F','G','H','I']
+columns = digits
 
 #creates an array containing key strings for all of the squares from A1, B1.. to I9.
-squares  = cross(rows, columns)
+squares = cross(rows, columns)
 
 #computes an array representing all of the units (rows, column and boxes)
 # as arrays of the key strings of the squares they contain
@@ -31,7 +31,6 @@ unitlist = ([cross(rows, column) for column in columns] +
 units = dict((square, [unit for unit in unitlist if square in unit]) for square in squares)
 #creates a dictionary that matches each square with its corresponding peers in the unit list
 peers = dict((square, (set(sum(units[square],[]))-set([square]))) for square in squares)
-
 
 def create_grid(grid):
     values = [item for item in grid if item in digits or item == 0]
@@ -46,7 +45,6 @@ def parse_grid(grid):
             # returns false if we fail to assign a valid digit to the particular square
             return False
     # returns values remaining after heuristic processing
-    print values
     return values
 
 
@@ -68,17 +66,15 @@ def assign(values, square, digit):
         return False
 
 def eliminate(values, square, digit):
-    # eliminates the digit from the square's possible values, and goes on
-    # to make changes to the peers if there is less than 2 values remaining
-    # or if there are less than 2 possible places for the digit.
-    # Returns the heuristically processed values if everything works, or returns
-    # false if a contradiction is discovered.
+    ''' eliminates the digit from the square's possible values, and goes on
+    to make changes to the peers if there is less than 2 values remaining
+    or if there are less than 2 possible places for the digit.
+    Returns the heuristically processed values if everything works, or returns
+    false if a contradiction is discovered.'''
     if digit not in values[square]:
         # the digit was already eliminated earlier
         return values
-
     values[square].remove(digit)
-
     # If the square is reduced to one last value, then that value cannot be contained
     # in its peers. Eliminate that value from the peers.
     if len(values[square]) == 0:
@@ -87,6 +83,12 @@ def eliminate(values, square, digit):
         last_digit = values[square][0]
         if not all(eliminate(values, peer_square, last_digit) for peer_square in peers[square]):
             return False
+    # Naked twins strategy:
+    # If two squares in the SAME UNIT have only two values and they are the same, the values must be
+    # contained in those two squares and the two values can be eliminated from all other squares
+    # in that unit.
+    elif len(values[square]) == 2:
+        naked_twins(square, values)
     # If only one possible place for the digit remains inside a unit, it must belong to that square.
     for unit in units[square]:
         digit_places = [unit_square for unit_square in unit if digit in values[unit_square]]
@@ -97,8 +99,27 @@ def eliminate(values, square, digit):
                 return False
     return values
 
+def naked_twins(square, values):
+    '''A function with the naked twins strategy: If two squares within the same unit contain only
+    the same two digits, both digits can be eliminated from all the other squares in that unit.'''
+    for unit in units[square]:
+        # Searches for peers from the same unit
+        for peer in set(unit).intersection(set(peers[square])):
+            # If an item in the unit contains the same values as the square (but is not the square itself),
+            # a naked pair is identified and those values are removed from all other items in the unit.
+            if not set(values[peer]).difference(set(values[square])):
+                digit1 = values[square][0]
+                digit2 = values[square][1]
+                for item in set(unit).difference(set([square, peer])):
+                    # If the item is not in the naked twins pair, remove the naked twins' values
+                    if digit1 in values[item]:
+                        values[item].remove(digit1)
+                    if digit2 in values[item]:
+                        values[item].remove(digit2)
+
 def search(values):
-    # Uses recursive search after constraint propagation to try all possible values one square at the time.
+    '''Uses recursive search, naked twins and constraint propagation
+    to try all possible values one square at the time.'''
     if values is False:
         return False
     if all(len(values[square]) == 1 for square in squares):
