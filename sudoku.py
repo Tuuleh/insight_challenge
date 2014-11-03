@@ -5,15 +5,17 @@ import string
 def open_puzzle(csv_file):
     with open(csv_file, 'r') as sudoku_csv:
         grid = []
+        # Creating an array of the rows to pass to the draw function, which renders the puzzle
         puzzle_rendering = []
         for row in sudoku_csv:
+            puzzle_row = []
             row = row.strip()
             if row:
-                puzzle_rendering.append([row.replace(",", " ")])
-            for item in row:
-                if item in string.digits:
-                    grid.append(item)
-
+                for item in row.split(","):
+                    if item in string.digits:
+                        grid.append(item)
+                        puzzle_row.append(item)
+                puzzle_rendering.append(puzzle_row)
         print "The puzzle you opened looks like this:"
         draw(puzzle_rendering)
         return grid
