@@ -44,8 +44,8 @@ Each square has its own "identification code", with an alphabetical character fr
 
 The program uses a combination of two heuristic strategies, the 'naked twins'-strategy, and recursive search to solve the puzzle. The heuristic strategies are the following:
 
-<i> a) If there is only one possible value for the square, that value cannot be contained by its peers (squares in the same row, column or box). Therefore, that value can be eliminated from its peers.<br>
-<i> b) If a unit (row, column or box) has only one possible place for a value, the value must be placed in that location.
+ - a) If there is only one possible value for the square, that value cannot be contained by its peers (squares in the same row, column or box). Therefore, that value can be eliminated from its peers.<br>
+ - b) If a unit (row, column or box) has only one possible place for a value, the value must be placed in that location.
 
 A failure in either heuristic strategy implies a contradiction in the puzzle. For simpler puzzles, the heuristic strategies are often enough to arrive at a solution, whereas more difficult ones rely on recursive search.
 
